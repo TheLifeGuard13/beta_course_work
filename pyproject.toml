@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "beta-course-work"
+version = "0.1.0"
+description = ""
+authors = ["Vlad Morozov <morozov90vlad@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+
+
+[tool.poetry.group.lint.dependencies]
+black = "^23.11.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+mypy = "^1.7.1"
+
+[tool.mypy]
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_return_any = true
+exclude = '.venv'
+warn_unreachable = true
+
+[tool.black]
+line-length = 119
+
+[tool.isort]
+line_length = 119
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
