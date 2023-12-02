@@ -256,6 +256,20 @@ pycodestyle = ">=2.11.0,<2.12.0"
 pyflakes = ">=3.1.0,<3.2.0"
 
 [[package]]
+name = "freezegun"
+version = "1.2.2"
+description = "Let your Python tests travel through time"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "freezegun-1.2.2-py3-none-any.whl", hash = "sha256:ea1b963b993cb9ea195adbd893a48d573fda951b0da64f60883d7e988b606c9f"},
+    {file = "freezegun-1.2.2.tar.gz", hash = "sha256:cd22d1ba06941384410cd967d8a99d5ae2442f57dfafeff2fda5de8dc5c05446"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.7"
+
+[[package]]
 name = "idna"
 version = "3.6"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -695,4 +709,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "da1ab3202a0b9b1452d853427178f4cc79da8e977a757f1f8bd20450037fb9bc"
+content-hash = "36a85055cd372ee4101d528f63bc6a33ef867a2ce4aab4a7a2b4cc496be20a5d"
