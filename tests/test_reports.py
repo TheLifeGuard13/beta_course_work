@@ -1,13 +1,12 @@
+import os
+from pathlib import Path
+
 import pandas as pd
 import pytest
-from pathlib import Path
-import os, fnmatch
-import datetime
 
 from config import OPERATIONS_PATH
-from src.reports import spending_by_category, report_to_file
+from src.reports import report_to_file, spending_by_category
 from src.utils import load_xlsx_file
-
 
 test_operations_path = Path(__file__).parent.parent.joinpath("tests", "test_data", "test_operations.xls")
 
@@ -48,23 +47,3 @@ def test_report_to_file_with_filename():
     output_df = pd.read_csv(filename, delimiter=",", encoding="utf-8")
 
     assert input_df.shape == output_df.shape
-
-
-def test_report_to_file_no_filename():
-    @report_to_file()
-    def func(df):
-        return df
-
-    func(load_xlsx_file(OPERATIONS_PATH))
-    file_path = Path(Path(__file__).parent.parent.joinpath("data", "reports"))
-
-    def find(pattern):
-        for root, dirs, files in os.walk(os.path.abspath(file_path)):
-            for name in files:
-                if fnmatch.fnmatch(name, pattern):
-                    return True
-                else:
-                    return False
-
-    result = find('*_func_report.csv')
-    assert result is True

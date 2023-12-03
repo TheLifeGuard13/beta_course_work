@@ -1,7 +1,6 @@
 import datetime
-import json
-import os
 import logging
+import os
 from pathlib import Path
 
 import requests
@@ -21,7 +20,7 @@ logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
 
 
-def get_stock_prices(stocks: list, date_obj: datetime) -> list[dict]:
+def get_stock_prices(stocks: list, date_obj: datetime.datetime) -> list[dict]:
     """
     получает курсы выбранных акций в выбранную дату через модуль yfinance
     и выдает в форме списка словарей
@@ -44,11 +43,11 @@ def get_stock_prices(stocks: list, date_obj: datetime) -> list[dict]:
         logger.info("Котировки успешно получены")
         return stock_list
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции get_stock_prices()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_stock_prices()")
         raise error
 
 
-def get_exchange_rate(currencies: list, date_obj: datetime) -> list[dict]:
+def get_exchange_rate(currencies: list, date_obj: datetime.datetime) -> list[dict]:
     """
     получает курсы валют в выбранную дату через APILAYER API
     и выдает в форме списка словарей
@@ -57,25 +56,21 @@ def get_exchange_rate(currencies: list, date_obj: datetime) -> list[dict]:
     return: список курсов валют
     """
     load_dotenv()
-    start_date = date_obj.strftime("%Y-%m-%d")
-    end_date = date_obj.strftime("%Y-%m-%d")
-    url = (
-        f"https://api.apilayer.com/exchangerates_data/timeseries?start_date={start_date}&end_date={end_date}&base=RUB"
-    )
+    sd = date_obj.strftime("%Y-%m-%d")
+    ed = date_obj.strftime("%Y-%m-%d")
+    url = f"https://api.apilayer.com/exchangerates_data/timeseries?start_date={sd}&end_date={ed}&base=RUB"
+    api_key = os.getenv("APILAYER_KEY")
     try:
-        api_key = os.getenv("APILAYER_KEY")
-        headers = {"apikey": api_key}
-        payload = []
-        response = requests.request("GET", url, headers=headers, data=payload)
-        currency_dict = json.loads(response.text)
+        response = requests.get(url, headers={"apikey": api_key}, data=[])
+        currency_dict = dict(response.json())
         currency_list = []
         for currency in currencies:
             dict_ = {}
             dict_["currency"] = currency
-            dict_["rate"] = round(1 / currency_dict["rates"][start_date][currency], 2)
+            dict_["rate"] = round(1 / float(currency_dict["rates"][sd][currency]), 2)
             currency_list.append(dict_)
         logger.info("Курсы валют успешно получены")
         return currency_list
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции get_exchange_rate()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_exchange_rate()")
         raise error

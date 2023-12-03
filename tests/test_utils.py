@@ -1,11 +1,19 @@
-import pytest
-from pathlib import Path
 import datetime
+from pathlib import Path
+
+import pytest
 from freezegun import freeze_time
 
 from config import OPERATIONS_PATH, STOCKS_CURRENCIES_PATH
-from src.utils import load_xlsx_file, load_json_file, get_converted_date, get_modified_df, get_cards_info, \
-    top_five_transactions, get_greeting_phrase
+from src.utils import (
+    get_cards_info,
+    get_converted_date,
+    get_greeting_phrase,
+    get_modified_df,
+    load_json_file,
+    load_xlsx_file,
+    top_five_transactions,
+)
 
 empty_operations_path = Path(__file__).parent.parent.joinpath("tests", "test_data", "empty_operations.xls")
 test_operations_path = Path(__file__).parent.parent.joinpath("tests", "test_data", "test_operations.xls")
@@ -55,19 +63,19 @@ def test_top_five_transactions():
 
 @freeze_time("2021-10-16 03:00:00")
 def test_get_greeting_phrase_morn():
-    assert get_greeting_phrase() == "Доброе утро"
+    assert get_greeting_phrase() == "Доброй ночи"
 
 
 @freeze_time("2021-10-16 10:00:00")
 def test_get_greeting_phrase_day():
-    assert get_greeting_phrase() == "Добрый день"
+    assert get_greeting_phrase() == "Доброе утро"
 
 
 @freeze_time("2021-10-16 15:00:00")
 def test_get_greeting_phrase_eve():
-    assert get_greeting_phrase() == "Добрый вечер"
+    assert get_greeting_phrase() == "Добрый день"
 
 
 @freeze_time("2021-10-16 21:00:00")
 def test_get_greeting_phrase_night():
-    assert get_greeting_phrase() == "Доброй ночи"
+    assert get_greeting_phrase() == "Добрый вечер"

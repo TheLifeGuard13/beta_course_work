@@ -31,11 +31,11 @@ def load_xlsx_file(filename: typing.Any) -> pd.DataFrame:
         logger.info("Файл успешно преобразован")
         return file_data
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции load_xlsx_file()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции load_xlsx_file()")
         raise error
 
 
-def load_json_file(filename: typing.Any) -> pd.DataFrame:
+def load_json_file(filename: typing.Any) -> dict:
     """
     открывает файл в формате json и превращает в формат python
     :param путь к файлу или строка-адрес
@@ -47,11 +47,11 @@ def load_json_file(filename: typing.Any) -> pd.DataFrame:
         logger.info("Файл успешно преобразован")
         return data
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции load_json_file()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции load_json_file()")
         raise error
 
 
-def get_converted_date(date: str) -> datetime:
+def get_converted_date(date: str) -> datetime.datetime:
     """
     преобразовывает дату-строку в объект datetime
     :param: формат "%Y-%m-%d %H:%M:%S"
@@ -62,11 +62,11 @@ def get_converted_date(date: str) -> datetime:
         logger.info("Дата успешно преобразована")
         return date_obj
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции get_converted_date()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_converted_date()")
         raise error
 
 
-def get_modified_df(df: pd.DataFrame, date_obj: datetime) -> pd.DataFrame:
+def get_modified_df(df: pd.DataFrame, date_obj: datetime.datetime) -> pd.DataFrame:
     """
     фильтрует успешные операции за выбранный месяц
     :param: объект pandas DataFrame
@@ -77,11 +77,13 @@ def get_modified_df(df: pd.DataFrame, date_obj: datetime) -> pd.DataFrame:
         start_date = date_obj.strftime("%Y.%m.01")
         end_date = date_obj.strftime("%Y.%m.%d")
         df["Дата операции"] = pd.to_datetime(df["Дата операции"], dayfirst=True)
-        modif_df = df.loc[(df["Статус"] == "OK") & (df["Дата операции"] >= start_date) & (df["Дата операции"] <= end_date)]
+        modif_df = df.loc[
+            (df["Статус"] == "OK") & (df["Дата операции"] >= start_date) & (df["Дата операции"] <= end_date)
+        ]
         logger.info("Файл успешно преобразован")
         return modif_df
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции get_modified_df()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_modified_df()")
         raise error
 
 
@@ -104,7 +106,7 @@ def get_cards_info(modified_df: pd.DataFrame) -> list[dict]:
         logger.info("Данные по картам успешно выданы")
         return exit_list
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции get_cards_info()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_cards_info()")
         raise error
 
 
@@ -128,7 +130,7 @@ def top_five_transactions(modified_df: pd.DataFrame) -> list[dict]:
         logger.info("Данные успешно преобразованы")
         return exit_list
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции top_five_transactions()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции top_five_transactions()")
         raise error
 
 
@@ -137,12 +139,12 @@ def get_greeting_phrase() -> str:
     :return: доброе утро/день/вечер/ночь"""
     current_hour = int(datetime.datetime.now().strftime("%H"))
     if current_hour < 6:
-        greeting = "Доброе утро"
-    elif current_hour < 12:
-        greeting = "Добрый день"
-    elif current_hour < 18:
-        greeting = "Добрый вечер"
-    else:
         greeting = "Доброй ночи"
+    elif current_hour < 12:
+        greeting = "Доброе утро"
+    elif current_hour < 18:
+        greeting = "Добрый день"
+    else:
+        greeting = "Добрый вечер"
     logger.info("Данные успешно выгружены")
     return greeting

@@ -1,9 +1,10 @@
+from pathlib import Path
+
+import pytest
+
 from config import OPERATIONS_PATH
 from src.services import invest_copilka
 from src.utils import load_xlsx_file
-import pytest
-from pathlib import Path
-
 
 test_operations_path = Path(__file__).parent.parent.joinpath("tests", "test_data", "test_operations.xls")
 

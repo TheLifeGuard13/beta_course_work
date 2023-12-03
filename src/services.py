@@ -2,8 +2,8 @@ import datetime
 import logging
 import math
 import os
+import typing
 from pathlib import Path
-
 
 data_path_log = Path(__file__).parent.parent.joinpath("data", "services.log")
 logger = logging.getLogger("__services__")
@@ -18,9 +18,7 @@ logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
 
 
-def invest_copilka(month: str,
-                   transactions: list[dict[str, any]],
-                   limit: int = None) -> float:
+def invest_copilka(month: str, transactions: list[dict[str, typing.Any]], limit: int) -> float:
     """
     рассчитывает сумму в копилке путем округления платежей за выбранный срок с выбранным лимитом
     param: дата в формате "YYYY-MM"
@@ -32,8 +30,11 @@ def invest_copilka(month: str,
     try:
         date_obj = datetime.datetime.strptime(month, "%Y-%m")
         corr_month = date_obj.strftime("%m.%Y")
-        required_transactions = [transaction for transaction in transactions
-                                 if corr_month in transaction["Дата операции"] and transaction["Статус"] == "OK"]
+        required_transactions = [
+            transaction
+            for transaction in transactions
+            if corr_month in transaction["Дата операции"] and transaction["Статус"] == "OK"
+        ]
         for transaction in required_transactions:
             if transaction["Сумма платежа"] < 0 and abs(int(transaction["Сумма платежа"])) % limit != 0:
                 payment_amount = abs(transaction["Сумма платежа"])
@@ -44,11 +45,13 @@ def invest_copilka(month: str,
                         round_amount = rounded_amount - payment_amount
                     else:
                         round_amount = difference
-                else:
+                elif limit == 10 or limit == 100:
                     round_amount = math.ceil(payment_amount / limit) * limit - payment_amount
+                else:
+                    round_amount = 0
                 money_in_copilka += round_amount
         logger.info("Копилка успешно наполнена")
         return round(money_in_copilka, 2)
     except Exception as error:
-        logger.error(f'Произошла ошибка: {str(error)} в функции invest_copilka()')
+        logger.error(f"Произошла ошибка: {str(error)} в функции invest_copilka()")
         raise error
