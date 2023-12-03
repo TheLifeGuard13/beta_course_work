@@ -13,13 +13,7 @@ logger.setLevel(logging.INFO)
 
 
 def invest_copilka(month: str, transactions: list[dict], limit: int) -> float:
-    """
-    рассчитывает сумму в копилке путем округления платежей за выбранный срок с выбранным лимитом
-    param: дата в формате "YYYY-MM"
-    param: список транзакций
-    param: лимит
-    return: сумма в копилке
-    """
+    """рассчитывает сумму в копилке путем округления платежей за выбранный срок с выбранным лимитом"""
     money_in_copilka = 0
     try:
         date_obj = datetime.datetime.strptime(month, "%Y-%m")

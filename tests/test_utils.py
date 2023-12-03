@@ -6,13 +6,13 @@ from freezegun import freeze_time
 
 from config import OPERATIONS_PATH, STOCKS_CURRENCIES_PATH
 from src.utils import (
-    get_cards_info,
+    get_cards_payments,
     get_converted_date,
     get_greeting_phrase,
-    get_modified_df,
+    filter_operations_by_date,
     load_json_file,
     load_xlsx_file,
-    top_five_transactions,
+    get_top_five_operations,
 )
 from tests.test_data.path_for_test import empty_json_path, empty_oper_path, empty_operations_path, test_operations_path
 
@@ -45,31 +45,31 @@ def test_get_converted_date():
 
 
 def test_get_modified_df():
-    assert len(get_modified_df(load_xlsx_file(OPERATIONS_PATH), get_converted_date(test_date))) == 91
+    assert len(filter_operations_by_date(load_xlsx_file(OPERATIONS_PATH), get_converted_date(test_date))) == 91
     with pytest.raises(ValueError):
-        assert get_modified_df(load_xlsx_file(test_operations_path), get_converted_date(test_date))
+        assert filter_operations_by_date(load_xlsx_file(test_operations_path), get_converted_date(test_date))
     with pytest.raises(KeyError):
-        assert get_modified_df(load_xlsx_file(empty_operations_path), get_converted_date(test_date))
+        assert filter_operations_by_date(load_xlsx_file(empty_operations_path), get_converted_date(test_date))
 
 
 def test_get_cards_info():
-    assert len(get_cards_info(load_xlsx_file(OPERATIONS_PATH))) == 7
+    assert len(get_cards_payments(load_xlsx_file(OPERATIONS_PATH))) == 7
     with pytest.raises(KeyError):
-        assert get_cards_info(load_xlsx_file(empty_operations_path))
+        assert get_cards_payments(load_xlsx_file(empty_operations_path))
     with pytest.raises(TypeError):
-        assert get_cards_info(empty_oper_path, False)
+        assert get_cards_payments(empty_oper_path, False)
     with pytest.raises(AttributeError):
-        assert get_cards_info(empty_oper_path)
+        assert get_cards_payments(empty_oper_path)
 
 
 def test_top_five_transactions():
-    assert len(top_five_transactions(load_xlsx_file(OPERATIONS_PATH))) == 5
+    assert len(get_top_five_operations(load_xlsx_file(OPERATIONS_PATH))) == 5
     with pytest.raises(KeyError):
-        assert top_five_transactions(load_xlsx_file(empty_operations_path))
+        assert get_top_five_operations(load_xlsx_file(empty_operations_path))
     with pytest.raises(TypeError):
-        assert top_five_transactions(empty_oper_path, False)
+        assert get_top_five_operations(empty_oper_path, False)
     with pytest.raises(AttributeError):
-        assert top_five_transactions(empty_oper_path)
+        assert get_top_five_operations(empty_oper_path)
 
 
 @freeze_time("2021-10-16 03:00:00")

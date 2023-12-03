@@ -16,11 +16,7 @@ logger.setLevel(logging.INFO)
 
 
 def load_xlsx_file(filename: typing.Any) -> pd.DataFrame:
-    """
-    открывает файл в формате xls и превращает в формат DataFrame
-    :param путь к файлу или строка-адрес
-    :return: объект pandas DataFrame
-    """
+    """конвертирует файл из формата xls в формат pd.DataFrame"""
     try:
         file_data = pd.read_excel(filename, na_filter=False)
         logger.info("Файл успешно преобразован")
@@ -33,17 +29,13 @@ def load_xlsx_file(filename: typing.Any) -> pd.DataFrame:
         raise error
 
 
-def load_json_file(filename: typing.Any) -> dict[typing.Any, typing.Any]:
-    """
-    открывает файл в формате json и превращает в формат python
-    :param путь к файлу или строка-адрес
-    :return: словарь python
-    """
+def load_json_file(filename: typing.Any) -> typing.Any:
+    """конвертирует файл из формата json в формат python"""
     try:
         with open(filename) as json_file:
-            data = json.load(json_file)
+            file_data = json.load(json_file)
         logger.info("Файл успешно преобразован")
-        return data
+        return file_data
     except FileNotFoundError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции load_json_file()")
         raise error
@@ -53,11 +45,7 @@ def load_json_file(filename: typing.Any) -> dict[typing.Any, typing.Any]:
 
 
 def get_converted_date(date: str) -> datetime.datetime:
-    """
-    преобразовывает дату-строку в объект datetime
-    :param: формат "%Y-%m-%d %H:%M:%S"
-    :return: объект datetime
-    """
+    """преобразовывает дату в формате строки в объект datetime"""
     try:
         date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         logger.info("Дата успешно преобразована")
@@ -70,24 +58,17 @@ def get_converted_date(date: str) -> datetime.datetime:
         raise error
 
 
-def get_modified_df(df: pd.DataFrame, date_obj: datetime.datetime) -> pd.DataFrame:
-    """
-    фильтрует успешные операции за выбранный месяц
-    :param: объект pandas DataFrame
-    :param: объект datetime
-    :return: объект pandas DataFrame
-    """
+def filter_operations_by_date(operations: pd.DataFrame, date_obj: datetime.datetime) -> pd.DataFrame:
+    """фильтрует успешные операции за месяц, с 1 числа месяца до выбранной даты"""
     try:
         start_date = date_obj.strftime("%Y.%m.01")
         end_date = date_obj.strftime("%Y.%m.%d")
-        df["Дата операции"] = pd.to_datetime(df["Дата операции"], dayfirst=True)
-        modif_df = df.loc[
-            (df["Статус"] == "OK") &
-            (df["Дата операции"] >= start_date) &
-            (df["Дата операции"] <= end_date)
-        ]
+        operations["Дата операции"] = pd.to_datetime(operations["Дата операции"], dayfirst=True)
+        filtered_operations = operations.loc[(operations["Статус"] == "OK")
+                                             & (operations["Дата операции"] >= start_date)
+                                             & (operations["Дата операции"] <= end_date)]
         logger.info("Файл успешно преобразован")
-        return modif_df
+        return filtered_operations
     except ValueError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции get_modified_df()")
         raise error
@@ -96,24 +77,23 @@ def get_modified_df(df: pd.DataFrame, date_obj: datetime.datetime) -> pd.DataFra
         raise error
 
 
-def get_cards_info(modified_df: pd.DataFrame) -> list[dict]:
-    """выдает траты по номеру карт в формате словарей
-    :param: объект pandas DataFrame
-    :return: список словарей
-    """
+def get_cards_payments(operations: pd.DataFrame) -> list[dict]:
+    """выгружает траты по номеру карт из массива и выдает в формате словарей"""
     try:
-        cards_list = list(set([i["Номер карты"] for i in modified_df.to_dict(orient="records") if i["Номер карты"]]))
-        exit_list = []
+        cards_list = list(set([i["Номер карты"] for i in operations.to_dict(orient="records") if i["Номер карты"]]))
+        new_list = []
         for card in cards_list:
-            dict_ = dict()
-            df = modified_df[modified_df["Номер карты"] == card]
-            summ_ = df.loc[(df["Сумма операции"] < 0) & (df["Валюта операции"] == "RUB"), "Сумма операции"].sum()
-            dict_["last_digits"] = card[1:]
-            dict_["total"] = round(abs(summ_), 2)
-            dict_["cashback"] = round(abs(summ_) * 0.01, 2)
-            exit_list.append(dict_)
+            new_dict = dict()
+            cards_operations = operations[operations["Номер карты"] == card]
+            operations_summ = cards_operations.loc[
+                (cards_operations["Сумма операции"] < 0)
+                & (cards_operations["Валюта операции"] == "RUB"), "Сумма операции"].sum()
+            new_dict["last_digits"] = card[1:]
+            new_dict["total"] = round(abs(operations_summ), 2)
+            new_dict["cashback"] = round(abs(operations_summ) * 0.01, 2)
+            new_list.append(new_dict)
         logger.info("Данные по картам успешно выданы")
-        return exit_list
+        return new_list
     except ValueError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции get_cards_info()")
         raise error
@@ -128,25 +108,24 @@ def get_cards_info(modified_df: pd.DataFrame) -> list[dict]:
         raise error
 
 
-def top_five_transactions(modified_df: pd.DataFrame) -> list[dict]:
-    """выбирает топ 5 операций по размеру трат
-    :param: объект pandas DataFrame
-    :return: список словарей
-    """
+def get_top_five_operations(operations: pd.DataFrame) -> list[dict]:
+    """выгружает топ 5 операций по сумме из массива и выдает в формате словарей"""
     try:
-        df = modified_df.loc[(modified_df["Сумма операции"] < 0) & (modified_df["Валюта операции"] == "RUB")]
-        new_fd = df.loc[df["Номер карты"] != ""]
-        top_five_list = new_fd.sort_values(by=["Сумма операции"], ascending=True).head(5).to_dict(orient="records")
-        exit_list = []
-        for i in top_five_list:
-            dict_ = dict().fromkeys(["date", "amount", "category", "description"], None)
-            dict_["date"] = pd.Timestamp(i["Дата операции"]).strftime("%d.%m.%Y")
-            dict_["amount"] = abs(i["Сумма операции"])
-            dict_["category"] = i.get("Категория")
-            dict_["description"] = i.get("Описание")
-            exit_list.append(dict_)
+        filtered_operations = operations.loc[(operations["Сумма операции"] < 0)
+                                             & (operations["Валюта операции"] == "RUB")]
+        card_operations = filtered_operations.loc[filtered_operations["Номер карты"] != ""]
+        top_five_operations_list = card_operations.sort_values(by=["Сумма операции"],
+                                                               ascending=True).head(5).to_dict(orient="records")
+        new_list = []
+        for operation in top_five_operations_list:
+            new_dict = dict().fromkeys(["date", "amount", "category", "description"], None)
+            new_dict["date"] = pd.Timestamp(operation["Дата операции"]).strftime("%d.%m.%Y")
+            new_dict["amount"] = abs(operation["Сумма операции"])
+            new_dict["category"] = operation.get("Категория")
+            new_dict["description"] = operation.get("Описание")
+            new_list.append(new_dict)
         logger.info("Данные успешно преобразованы")
-        return exit_list
+        return new_list
     except ValueError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции top_five_transactions()")
         raise error
