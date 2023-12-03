@@ -1,16 +1,10 @@
 import datetime
 import logging
 import math
-import os
-import typing
 from pathlib import Path
 
 data_path_log = Path(__file__).parent.parent.joinpath("data", "services.log")
 logger = logging.getLogger("__services__")
-
-if os.path.exists(data_path_log):
-    os.remove(data_path_log)
-
 file_handler = logging.FileHandler(data_path_log, encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 file_handler.setFormatter(file_formatter)
@@ -18,7 +12,7 @@ logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
 
 
-def invest_copilka(month: str, transactions: list[dict[str, typing.Any]], limit: int) -> float:
+def invest_copilka(month: str, transactions: list[dict], limit: int) -> float:
     """
     рассчитывает сумму в копилке путем округления платежей за выбранный срок с выбранным лимитом
     param: дата в формате "YYYY-MM"
@@ -52,6 +46,12 @@ def invest_copilka(month: str, transactions: list[dict[str, typing.Any]], limit:
                 money_in_copilka += round_amount
         logger.info("Копилка успешно наполнена")
         return round(money_in_copilka, 2)
-    except Exception as error:
+    except ValueError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции invest_copilka()")
+        raise error
+    except KeyError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции invest_copilka()")
+        raise error
+    except TypeError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции invest_copilka()")
         raise error

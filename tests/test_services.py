@@ -1,12 +1,9 @@
-from pathlib import Path
-
 import pytest
 
 from config import OPERATIONS_PATH
 from src.services import invest_copilka
 from src.utils import load_xlsx_file
-
-test_operations_path = Path(__file__).parent.parent.joinpath("tests", "test_data", "test_operations.xls")
+from tests.test_data.path_for_test import test_operations_path
 
 
 @pytest.fixture
@@ -23,6 +20,8 @@ def test_invest_copilka(transactions):
     assert invest_copilka("2023-10", transactions, 100) == 0
     with pytest.raises(ValueError):
         assert invest_copilka("2024-13", transactions, 100)
+    with pytest.raises(TypeError):
+        assert invest_copilka(False, transactions, 100)
 
 
 @pytest.fixture

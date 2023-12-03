@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import os
 import typing
 from pathlib import Path
 
@@ -9,10 +8,6 @@ import pandas as pd
 
 data_path_log = Path(__file__).parent.parent.joinpath("data", "utils.log")
 logger = logging.getLogger("__utils__")
-
-if os.path.exists(data_path_log):
-    os.remove(data_path_log)
-
 file_handler = logging.FileHandler(data_path_log, encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 file_handler.setFormatter(file_formatter)
@@ -30,12 +25,15 @@ def load_xlsx_file(filename: typing.Any) -> pd.DataFrame:
         file_data = pd.read_excel(filename, na_filter=False)
         logger.info("Файл успешно преобразован")
         return file_data
-    except Exception as error:
+    except FileNotFoundError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции load_xlsx_file()")
+        raise error
+    except ValueError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции load_xlsx_file()")
         raise error
 
 
-def load_json_file(filename: typing.Any) -> dict:
+def load_json_file(filename: typing.Any) -> dict[typing.Any, typing.Any]:
     """
     открывает файл в формате json и превращает в формат python
     :param путь к файлу или строка-адрес
@@ -46,7 +44,10 @@ def load_json_file(filename: typing.Any) -> dict:
             data = json.load(json_file)
         logger.info("Файл успешно преобразован")
         return data
-    except Exception as error:
+    except FileNotFoundError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции load_json_file()")
+        raise error
+    except json.decoder.JSONDecodeError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции load_json_file()")
         raise error
 
@@ -61,7 +62,10 @@ def get_converted_date(date: str) -> datetime.datetime:
         date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
         logger.info("Дата успешно преобразована")
         return date_obj
-    except Exception as error:
+    except ValueError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_converted_date()")
+        raise error
+    except TypeError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции get_converted_date()")
         raise error
 
@@ -78,11 +82,16 @@ def get_modified_df(df: pd.DataFrame, date_obj: datetime.datetime) -> pd.DataFra
         end_date = date_obj.strftime("%Y.%m.%d")
         df["Дата операции"] = pd.to_datetime(df["Дата операции"], dayfirst=True)
         modif_df = df.loc[
-            (df["Статус"] == "OK") & (df["Дата операции"] >= start_date) & (df["Дата операции"] <= end_date)
+            (df["Статус"] == "OK") &
+            (df["Дата операции"] >= start_date) &
+            (df["Дата операции"] <= end_date)
         ]
         logger.info("Файл успешно преобразован")
         return modif_df
-    except Exception as error:
+    except ValueError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_modified_df()")
+        raise error
+    except KeyError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции get_modified_df()")
         raise error
 
@@ -105,7 +114,16 @@ def get_cards_info(modified_df: pd.DataFrame) -> list[dict]:
             exit_list.append(dict_)
         logger.info("Данные по картам успешно выданы")
         return exit_list
-    except Exception as error:
+    except ValueError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_cards_info()")
+        raise error
+    except KeyError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_cards_info()")
+        raise error
+    except TypeError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции get_cards_info()")
+        raise error
+    except AttributeError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции get_cards_info()")
         raise error
 
@@ -129,7 +147,16 @@ def top_five_transactions(modified_df: pd.DataFrame) -> list[dict]:
             exit_list.append(dict_)
         logger.info("Данные успешно преобразованы")
         return exit_list
-    except Exception as error:
+    except ValueError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции top_five_transactions()")
+        raise error
+    except KeyError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции top_five_transactions()")
+        raise error
+    except TypeError as error:
+        logger.error(f"Произошла ошибка: {str(error)} в функции top_five_transactions()")
+        raise error
+    except AttributeError as error:
         logger.error(f"Произошла ошибка: {str(error)} в функции top_five_transactions()")
         raise error
 

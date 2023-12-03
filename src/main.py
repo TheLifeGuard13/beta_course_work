@@ -19,6 +19,9 @@ if __name__ == "__main__":
     user_currencies = load_json_file(STOCKS_CURRENCIES_PATH)["user_currencies"]
 
     def main_page(date: str) -> dict:
+        """
+        передает данные в формате словаря
+        """
         date_obj = get_converted_date(date)
         selected_df = get_modified_df(load_xlsx_file(OPERATIONS_PATH), date_obj)
         dict_ = {}

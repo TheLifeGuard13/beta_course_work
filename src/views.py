@@ -9,10 +9,6 @@ from dotenv import load_dotenv
 
 data_path_log = Path(__file__).parent.parent.joinpath("data", "views.log")
 logger = logging.getLogger("__views__")
-
-if os.path.exists(data_path_log):
-    os.remove(data_path_log)
-
 file_handler = logging.FileHandler(data_path_log, encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
 file_handler.setFormatter(file_formatter)

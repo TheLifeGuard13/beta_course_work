@@ -30,18 +30,30 @@ def report_to_file(*, filename: str | typing.Any = "") -> typing.Any:
 
 @report_to_file()
 def spending_by_category(transactions: pd.DataFrame, category: str, date: str = "") -> pd.DataFrame:
-    """Функция"""
-    if date == "":
-        date_obj = datetime.datetime.now()
-    else:
-        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-    start_date = (date_obj - datetime.timedelta(days=90)).strftime("%Y.%m.%d")
-    end_date = date_obj.strftime("%Y.%m.%d")
-    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], dayfirst=True)
-    df_by_category = transactions.loc[
-        (transactions["Статус"] == "OK")
-        & (transactions["Дата операции"] >= start_date)
-        & (transactions["Дата операции"] <= end_date)
-        & (transactions["Категория"] == category)
-    ]
-    return df_by_category
+    """фильтрует операции по категории и дате
+    param: transactions - таблица операций
+    param: category - категория операции
+    param: date - дата операции
+    returns: объект DataFrame
+    """
+    try:
+        if date == "":
+            date_obj = datetime.datetime.now()
+        else:
+            date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        start_date = (date_obj - datetime.timedelta(days=90)).strftime("%Y.%m.%d")
+        end_date = date_obj.strftime("%Y.%m.%d")
+        transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], dayfirst=True)
+        df_by_category = transactions.loc[
+            (transactions["Статус"] == "OK")
+            & (transactions["Дата операции"] >= start_date)
+            & (transactions["Дата операции"] <= end_date)
+            & (transactions["Категория"] == category)
+        ]
+        return df_by_category
+    except ValueError as error:
+        raise error
+    except KeyError as error:
+        raise error
+    except TypeError as error:
+        raise error
