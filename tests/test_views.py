@@ -5,7 +5,7 @@ import pytest
 
 from config import STOCKS_CURRENCIES_PATH
 from src.utils import get_converted_date, load_json_file
-from src.views import get_exchange_rate, get_stock_prices
+from src.views import get_currency_rates, get_stock_prices
 
 date_obj = get_converted_date("2021-10-16 16:00:00")
 start_date = date_obj.strftime("%Y-%m-%d")
@@ -193,9 +193,9 @@ response_request = {
 
 
 @patch("requests.get")
-def test_get_exchange_rate(mock_get):
+def test_get_currency_rates(mock_get):
     mock_get.return_value.json.return_value = response_request
-    assert get_exchange_rate(load_json_file(STOCKS_CURRENCIES_PATH)["user_currencies"], date_obj) == [
+    assert get_currency_rates(load_json_file(STOCKS_CURRENCIES_PATH)["user_currencies"], date_obj) == [
         {"currency": "USD", "rate": 70.99},
         {"currency": "EUR", "rate": 82.34},
         {"currency": "CHF", "rate": 76.88},
@@ -211,11 +211,10 @@ def test_get_exchange_rate(mock_get):
     )
 
 
-def test_get_exchange_rate_():
+def test_get_currency_rates_():
     with pytest.raises(KeyError):
-        assert get_exchange_rate(
-            load_json_file(STOCKS_CURRENCIES_PATH)["user_currencies"], get_converted_date("2035-11-11 16:00:00")
-        )
+        assert get_currency_rates(load_json_file(STOCKS_CURRENCIES_PATH)["user_currencies"],
+                                  get_converted_date("2035-11-11 16:00:00"))
 
 
 def test_get_stock_prices():
@@ -230,6 +229,5 @@ def test_get_stock_prices():
 
 def test_get_stock_prices_():
     with pytest.raises(IndexError):
-        assert get_stock_prices(
-            load_json_file(STOCKS_CURRENCIES_PATH)["user_stocks"], get_converted_date("2035-11-11 16:00:00")
-        )
+        assert get_stock_prices(load_json_file(STOCKS_CURRENCIES_PATH)["user_stocks"],
+                                get_converted_date("2035-11-11 16:00:00"))

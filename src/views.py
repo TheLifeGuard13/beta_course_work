@@ -17,13 +17,8 @@ logger.setLevel(logging.INFO)
 
 
 def get_stock_prices(stocks: list, date_obj: datetime.datetime) -> list[dict]:
-    """
-    получает курсы выбранных акций в выбранную дату через модуль yfinance
-    и выдает в форме списка словарей
-    param: список акций
-    param: дата в формате date_obj
-    return: список котировок акций
-    """
+    """выгружает через модуль yfinance курсы выбранных акций в выбранную дату
+    и выдает в форме списка словарей"""
     try:
         start_date = date_obj.strftime("%Y-%m-%d")
         end_date = (date_obj + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
@@ -43,27 +38,24 @@ def get_stock_prices(stocks: list, date_obj: datetime.datetime) -> list[dict]:
         raise error
 
 
-def get_exchange_rate(currencies: list, date_obj: datetime.datetime) -> list[dict]:
-    """
-    получает курсы валют в выбранную дату через APILAYER API
-    и выдает в форме списка словарей
-    param: список акций
-    param: дата в формате date_obj
-    return: список курсов валют
-    """
+def get_currency_rates(currencies: list, date_obj: datetime.datetime) -> list[dict]:
+    """выгружает через APILAYER выбранные курсы валют в выбранную дату
+    и выдает в форме списка словарей"""
     load_dotenv()
-    sd = date_obj.strftime("%Y-%m-%d")
-    ed = date_obj.strftime("%Y-%m-%d")
-    url = f"https://api.apilayer.com/exchangerates_data/timeseries?start_date={sd}&end_date={ed}&base=RUB"
+    start_date = date_obj.strftime("%Y-%m-%d")
+    end_date = date_obj.strftime("%Y-%m-%d")
+    url = (f"https://api.apilayer.com/exchangerates_data/timeseries?"
+           f"start_date={start_date}&end_date={end_date}&base=RUB")
     api_key = os.getenv("APILAYER_KEY")
+    headers = {"apikey": api_key}
     try:
-        response = requests.get(url, headers={"apikey": api_key}, data=[])
-        currency_dict = dict(response.json())
+        response = requests.get(url, headers=headers, data=[])
+        currency_dict = response.json()
         currency_list = []
         for currency in currencies:
             dict_ = {}
             dict_["currency"] = currency
-            dict_["rate"] = round(1 / float(currency_dict["rates"][sd][currency]), 2)
+            dict_["rate"] = round(1 / float(currency_dict["rates"][start_date][currency]), 2)
             currency_list.append(dict_)
         logger.info("Курсы валют успешно получены")
         return currency_list

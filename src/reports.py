@@ -30,12 +30,7 @@ def report_to_file(*, filename: str | typing.Any = "") -> typing.Any:
 
 @report_to_file()
 def spending_by_category(transactions: pd.DataFrame, category: str, date: str = "") -> pd.DataFrame:
-    """фильтрует операции по категории и дате
-    param: transactions - таблица операций
-    param: category - категория операции
-    param: date - дата операции
-    returns: объект DataFrame
-    """
+    """фильтрует траты в объекте pd.DataFrame по категории и дате"""
     try:
         if date == "":
             date_obj = datetime.datetime.now()
